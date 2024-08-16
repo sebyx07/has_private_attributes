@@ -1,39 +1,159 @@
-# HasPrivateAttributes
+# HasPrivateAttributes 🔒
 
-TODO: Delete this and the text below, and describe your gem
+This Ruby gem provides a simple and elegant way to define private attributes in your classes. It allows you to create static, lazy-evaluated, and argument-based private attributes with automatic caching and freezing of the returned values, all in a thread-safe manner.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/has_private_attributes`. To experiment with that code, run `bin/console` for an interactive prompt.
+## Features 🌟
 
-## Installation
+- **Static Attributes**: Define private attributes with a fixed, immutable value.
+- **Lazy Attributes**: Define private attributes that are lazily evaluated and cached.
+- **Argument-based Attributes**: Define private attributes that depend on arguments and cache the results.
+- **Inheritance**: Private attributes can be inherited from parent classes.
+- **Freezing**: All returned values are automatically deep-frozen to prevent modification.
+- **Thread Safety**: All operations are thread-safe, allowing for use in multi-threaded environments.
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+## Installation 📥
 
-Install the gem and add to the application's Gemfile by executing:
+Add this line to your application's Gemfile:
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+```ruby
+gem 'has_private_attributes'
+```
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+And then execute:
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+```bash
+bundle install
+```
 
-## Usage
+## Usage 🚀
 
-TODO: Write usage instructions here
+Here's a simple example of how to use the `HasPrivateAttributes` gem:
 
-## Development
+```ruby
+class MyClass
+  include HasPrivateAttributes
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+  private_attribute :static_servers, [
+    { ip: '1.1.1.1', location: 'US' },
+    { ip: '8.8.8.8', location: 'US' }
+  ]
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+  private_attribute :lazy_servers do
+    [
+      { ip: '2.2.2.2', location: 'EU' },
+      { ip: '3.3.3.3', location: 'EU' }
+    ]
+  end
 
-## Contributing
+  private_attribute :servers_by_region do |region|
+    case region
+    when 'us'
+      [
+        { ip: '1.1.1.1', location: 'US' },
+        { ip: '8.8.8.8', location: 'US' }
+      ]
+    when 'eu'
+      [
+        { ip: '2.2.2.2', location: 'EU' }
+      ]
+    end
+  end
+
+  def get_static_servers
+    static_servers
+  end
+
+  def get_lazy_servers
+    lazy_servers
+  end
+
+  def get_servers_by_region(region)
+    servers_by_region(region)
+  end
+end
+
+instance = MyClass.new
+
+puts instance.get_static_servers
+# Output:
+# [
+#   { ip: '1.1.1.1', location: 'US' },
+#   { ip: '8.8.8.8', location: 'US' }
+# ]
+
+puts instance.get_lazy_servers
+# Output:
+# [
+#   { ip: '2.2.2.2', location: 'EU' },
+#   { ip: '3.3.3.3', location: 'EU' }
+# ]
+
+puts instance.get_servers_by_region('us')
+# Output:
+# [
+#   { ip: '1.1.1.1', location: 'US' },
+#   { ip: '8.8.8.8', location: 'US' }
+# ]
+
+puts instance.get_servers_by_region('eu')
+# Output:
+# [
+#   { ip: '2.2.2.2', location: 'EU' }
+# ]
+```
+
+## Examples 💡
+
+Here are some more examples of using the `HasPrivateAttributes` gem:
+
+### Static Attributes 🗄️
+
+```ruby
+instance.static_servers # => [{ ip: '1.1.1.1', location: 'US' }, { ip: '8.8.8.8', location: 'US' }]
+instance.static_servers.frozen? # => true
+```
+
+### Lazy Attributes 🐢
+
+```ruby
+instance.lazy_servers # => [{ ip: '2.2.2.2', location: 'EU' }, { ip: '3.3.3.3', location: 'EU' }]
+instance.lazy_servers.object_id # => 12345678
+instance.lazy_servers.object_id # => 12345678 (same object)
+```
+
+### Argument-based Attributes 🔍
+
+```ruby
+instance.servers_by_region('us') # => [{ ip: '1.1.1.1', location: 'US' }, { ip: '8.8.8.8', location: 'US' }]
+instance.servers_by_region('eu') # => [{ ip: '2.2.2.2', location: 'EU' }]
+```
+
+## Thread Safety 🔒
+
+All operations in HasPrivateAttributes are thread-safe. This means you can safely use private attributes in multi-threaded environments without worrying about race conditions or data inconsistencies. The gem uses Ruby's `Monitor` and `Mutex` classes to ensure proper synchronization.
+
+For example, you can safely access private attributes from multiple threads:
+
+```ruby
+threads = []
+10.times do
+  threads << Thread.new do
+    puts instance.get_lazy_servers
+  end
+end
+threads.each(&:join)
+```
+
+This will safely initialize and return the lazy servers, even if multiple threads try to access it simultaneously.
+
+## Contributing 🤝
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/has_private_attributes. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/has_private_attributes/blob/master/CODE_OF_CONDUCT.md).
 
-## License
+## License 📄
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
 
-## Code of Conduct
+## Code of Conduct 🤵
 
 Everyone interacting in the HasPrivateAttributes project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/has_private_attributes/blob/master/CODE_OF_CONDUCT.md).
