@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    has_private_attributes (0.1.0)
+    has_private_attributes (1.0.0)
 
 GEM
   remote: https://rubygems.org/

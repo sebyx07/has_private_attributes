@@ -1,6 +1,6 @@
 # HasPrivateAttributes 🔒
 
-This Ruby gem provides a simple and elegant way to define private attributes in your classes. It allows you to create static, lazy-evaluated, and argument-based private attributes with automatic caching and freezing of the returned values, all in a thread-safe manner.
+This Ruby gem provides a simple and elegant way to define private attributes in your classes. It allows you to create static, lazy-evaluated, and argument-based private attributes with automatic caching and freezing of the returned values, all in a thread-safe manner. It works for both instance methods and class methods.
 
 ## Features 🌟
 
@@ -10,6 +10,7 @@ This Ruby gem provides a simple and elegant way to define private attributes in 
 - **Inheritance**: Private attributes can be inherited from parent classes.
 - **Freezing**: All returned values are automatically deep-frozen to prevent modification.
 - **Thread Safety**: All operations are thread-safe, allowing for use in multi-threaded environments.
+- **Class Method Support**: Private attributes can be used in both instance and class methods.
 
 ## Installation 📥
 
@@ -27,7 +28,7 @@ bundle install
 
 ## Usage 🚀
 
-Here's a simple example of how to use the `HasPrivateAttributes` gem:
+Here's a simple example of how to use the `HasPrivateAttributes` gem with both instance and class methods:
 
 ```ruby
 class MyClass
@@ -61,7 +62,7 @@ class MyClass
     end
   end
 
-  # usage of private attributes
+  # usage of private attributes in instance methods
 
   def get_static_servers
     static_servers
@@ -72,6 +73,20 @@ class MyClass
   end
 
   def get_servers_by_region(region)
+    servers_by_region(region)
+  end
+
+  # usage of private attributes in class methods
+
+  def self.get_static_servers
+    static_servers
+  end
+
+  def self.get_lazy_servers
+    lazy_servers
+  end
+
+  def self.get_servers_by_region(region)
     servers_by_region(region)
   end
 end
@@ -85,24 +100,18 @@ puts instance.get_static_servers
 #   { ip: '8.8.8.8', location: 'US' }
 # ]
 
-puts instance.get_lazy_servers
+puts MyClass.get_lazy_servers
 # Output:
 # [
 #   { ip: '2.2.2.2', location: 'EU' },
 #   { ip: '3.3.3.3', location: 'EU' }
 # ]
 
-puts instance.get_servers_by_region('us')
+puts MyClass.get_servers_by_region('us')
 # Output:
 # [
 #   { ip: '1.1.1.1', location: 'US' },
 #   { ip: '8.8.8.8', location: 'US' }
-# ]
-
-puts instance.get_servers_by_region('eu')
-# Output:
-# [
-#   { ip: '2.2.2.2', location: 'EU' }
 # ]
 ```
 
@@ -113,23 +122,53 @@ Here are some more examples of using the `HasPrivateAttributes` gem:
 ### Static Attributes 🗄️
 
 ```ruby
-instance.static_servers # => [{ ip: '1.1.1.1', location: 'US' }, { ip: '8.8.8.8', location: 'US' }]
-instance.static_servers.frozen? # => true
+instance.get_static_servers # => [{ ip: '1.1.1.1', location: 'US' }, { ip: '8.8.8.8', location: 'US' }]
+instance.get_static_servers.frozen? # => true
+MyClass.get_static_servers # => [{ ip: '1.1.1.1', location: 'US' }, { ip: '8.8.8.8', location: 'US' }]
 ```
 
 ### Lazy Attributes 🐢
 
 ```ruby
-instance.lazy_servers # => [{ ip: '2.2.2.2', location: 'EU' }, { ip: '3.3.3.3', location: 'EU' }]
-instance.lazy_servers.object_id # => 12345678
-instance.lazy_servers.object_id # => 12345678 (same object)
+instance.get_lazy_servers # => [{ ip: '2.2.2.2', location: 'EU' }, { ip: '3.3.3.3', location: 'EU' }]
+instance.get_lazy_servers.object_id # => 12345678
+instance.get_lazy_servers.object_id # => 12345678 (same object)
+MyClass.get_lazy_servers # => [{ ip: '2.2.2.2', location: 'EU' }, { ip: '3.3.3.3', location: 'EU' }]
 ```
 
 ### Argument-based Attributes 🔍
 
 ```ruby
-instance.servers_by_region('us') # => [{ ip: '1.1.1.1', location: 'US' }, { ip: '8.8.8.8', location: 'US' }]
-instance.servers_by_region('eu') # => [{ ip: '2.2.2.2', location: 'EU' }]
+instance.get_servers_by_region('us') # => [{ ip: '1.1.1.1', location: 'US' }, { ip: '8.8.8.8', location: 'US' }]
+instance.get_servers_by_region('eu') # => [{ ip: '2.2.2.2', location: 'EU' }]
+MyClass.get_servers_by_region('us') # => [{ ip: '1.1.1.1', location: 'US' }, { ip: '8.8.8.8', location: 'US' }]
+```
+
+### Class Methods 🏫
+
+```ruby
+class Configuration
+  include HasPrivateAttributes
+
+  private_attribute :default_settings do
+    {
+      timeout: 30,
+      retries: 3,
+      log_level: :info
+    }
+  end
+
+  def self.timeout
+    default_settings[:timeout]
+  end
+
+  def self.retries
+    default_settings[:retries]
+  end
+end
+
+Configuration.timeout # => 30
+Configuration.retries # => 3
 ```
 
 ## Thread Safety 🔒
@@ -142,7 +181,7 @@ For example, you can safely access private attributes from multiple threads:
 threads = []
 10.times do
   threads << Thread.new do
-    puts instance.get_lazy_servers
+    puts MyClass.get_lazy_servers
   end
 end
 threads.each(&:join)
