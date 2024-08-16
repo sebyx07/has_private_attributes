@@ -33,6 +33,8 @@ Here's a simple example of how to use the `HasPrivateAttributes` gem:
 class MyClass
   include HasPrivateAttributes
 
+  # definition of private attributes
+
   private_attribute :static_servers, [
     { ip: '1.1.1.1', location: 'US' },
     { ip: '8.8.8.8', location: 'US' }
@@ -58,6 +60,8 @@ class MyClass
       ]
     end
   end
+
+  # usage of private attributes
 
   def get_static_servers
     static_servers
@@ -148,7 +152,7 @@ This will safely initialize and return the lazy servers, even if multiple thread
 
 ## Contributing 🤝
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/has_private_attributes. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/has_private_attributes/blob/master/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at https://github.com/sebyx07/has_private_attributes. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/sebyx07/has_private_attributes/blob/master/CODE_OF_CONDUCT.md).
 
 ## License 📄
 
@@ -156,4 +160,4 @@ The gem is available as open source under the terms of the [MIT License](https:/
 
 ## Code of Conduct 🤵
 
-Everyone interacting in the HasPrivateAttributes project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/has_private_attributes/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the HasPrivateAttributes project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/sebyx07/has_private_attributes/blob/master/CODE_OF_CONDUCT.md).
